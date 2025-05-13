@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
 import { ThemeProvider } from './contexts/ThemeContext';
-import { AjouterProduit } from './pages/AjouterProduit';
+import AjouterProduit from './pages/AjouterProduit';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
