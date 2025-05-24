@@ -1,7 +1,9 @@
 import debounce from 'lodash.debounce';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useItemStore } from '../stores/useItemStore';
 import { useRarityStore } from '../stores/useRarityStore';
+
 
 const AjouterProduit = () => {
   const [formData, setFormData] = useState({
@@ -131,6 +133,8 @@ const AjouterProduit = () => {
       if (!res.ok) throw new Error('Erreur lors de l’ajout');
 
       setMessage('Carte ajoutée avec succès 🎉');
+      toast.success(`Carte ajoutée avec succès 🎉`);
+
       setFormData({
         name: '',
         edition: '',
@@ -144,7 +148,8 @@ const AjouterProduit = () => {
       setSelectedFile(null);
     } catch (error) {
       console.error(error);
-      setMessage("Erreur lors de l'ajout de la carte.");
+      toast.success(`Erreur lors de l'ajout de la carte.`);
+
     } finally {
       setLoading(false);
     }

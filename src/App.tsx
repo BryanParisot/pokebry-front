@@ -1,3 +1,4 @@
+import { Toaster } from 'react-hot-toast';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { PrivateRoute } from './components/PrivateRoute';
@@ -7,8 +8,12 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Statistiques } from './pages/Statistiques';
+
+
+
 export function App() {
   return <ThemeProvider>
+    <Toaster position="top-right" />
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />

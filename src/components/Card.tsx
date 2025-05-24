@@ -1,7 +1,10 @@
 import { StarIcon, Trash2Icon, TrendingDownIcon, TrendingUpIcon } from 'lucide-react';
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import { useCollectionStore } from '../stores/collectionStore';
 import { ConfirmModal } from './ConfirmModal';
+
+
 export const Card = ({ card, view, onDelete }) => {
 
   const {
@@ -36,11 +39,14 @@ export const Card = ({ card, view, onDelete }) => {
       if (res.ok) {
         onDelete(card.id);
         await fetchCollection();
+        toast.success(`Carte "${card.name}" supprimée avec succès !`);
       } else {
         console.error("Échec de la suppression de la carte.");
+        toast.error("Échec de la suppression de la carte.");
       }
     } catch (error) {
       console.error("Erreur lors de la suppression :", error);
+      toast.error("Une erreur est survenue.");
     } finally {
       setShowConfirm(false);
     }
