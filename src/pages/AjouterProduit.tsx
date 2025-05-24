@@ -1,3 +1,4 @@
+import debounce from 'lodash.debounce';
 import { useEffect, useState } from 'react';
 import { useItemStore } from '../stores/useItemStore';
 import { useRarityStore } from '../stores/useRarityStore';
@@ -11,19 +12,58 @@ const AjouterProduit = () => {
     quality: 5,
     purchase_price: '',
     estimated_value: '',
-    image_url: 'https://images.pokemontcg.io/shf/SV044_hires.png',
+    image_url: '',
   });
 
   const { rarities, fetchRarities } = useRarityStore();
   const { items, fetchitem } = useItemStore();
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFilePreview, setSelectedFilePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [cardSuggestions, setCardSuggestions] = useState([]);
 
   useEffect(() => {
     fetchRarities();
     fetchitem();
   }, []);
+
+  useEffect(() => {
+    if (selectedFile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedFilePreview(reader.result);
+      };
+      reader.readAsDataURL(selectedFile);
+    } else {
+      setSelectedFilePreview(null);
+    }
+  }, [selectedFile]);
+
+  const selectedItem = items.find(i => i.id === Number(formData.item_type_id));
+  const isCard = selectedItem?.name.toLowerCase() === 'carte';
+
+  const searchCard = debounce(async (query) => {
+    if (!query || query.length < 3) return;
+    try {
+      const res = await fetch(`https://api.tcgdex.net/v2/fr/cards?name=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setCardSuggestions(data.slice(0, 5));
+    } catch (err) {
+      console.error(err);
+    }
+  }, 500);
+
+  const fetchCardDetails = async (cardId) => {
+    const res = await fetch(`https://api.tcgdex.net/v2/fr/cards/${cardId}`);
+    const data = await res.json();
+    return data;
+  };
+
+  useEffect(() => {
+    if (isCard) searchCard(formData.name);
+  }, [formData.name, isCard]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -33,31 +73,59 @@ const AjouterProduit = () => {
     }));
   };
 
+  const handleSelectSuggestion = async (card) => {
+    const fullCard = await fetchCardDetails(card.id);
+    setFormData((prev) => ({
+      ...prev,
+      name: fullCard.name,
+      image_url: `${fullCard.image}/high.png`,
+      edition: fullCard.set?.name || "",
+    }));
+    setCardSuggestions([]);
+    setSelectedFile(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
 
-    const payload = {
-      name: formData.name,
-      edition: formData.edition,
-      item_type_id: Number(formData.item_type_id),
-      rarity_id: Number(formData.rarity_id),
-      quality: Number(formData.quality),
-      purchase_price: parseFloat(formData.purchase_price),
-      estimated_value: parseFloat(formData.estimated_value),
-      image_url: formData.image_url,
-    };
+    const token = localStorage.getItem('authToken');
 
     try {
-      const token = localStorage.getItem('authToken');
+      let formPayload;
+
+      if (selectedFile) {
+        formPayload = new FormData();
+        formPayload.append('name', formData.name);
+        formPayload.append('edition', formData.edition);
+        formPayload.append('item_type_id', formData.item_type_id);
+        formPayload.append('rarity_id', formData.rarity_id);
+        formPayload.append('quality', formData.quality);
+        formPayload.append('purchase_price', formData.purchase_price);
+        formPayload.append('estimated_value', formData.estimated_value);
+        formPayload.append('image', selectedFile); // fichier image
+      } else {
+        formPayload = JSON.stringify({
+          ...formData,
+          item_type_id: Number(formData.item_type_id),
+          rarity_id: Number(formData.rarity_id),
+          quality: Number(formData.quality),
+          purchase_price: parseFloat(formData.purchase_price),
+          estimated_value: parseFloat(formData.estimated_value),
+          image_url: formData.image_url, // URL image
+        });
+      }
+
       const res = await fetch('http://localhost:3000/api/collection/add-item', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        headers: selectedFile
+          ? { Authorization: `Bearer ${token}` }
+          : {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        body: formPayload,
       });
 
       if (!res.ok) throw new Error('Erreur lors de l’ajout');
@@ -73,6 +141,7 @@ const AjouterProduit = () => {
         estimated_value: '',
         image_url: '',
       });
+      setSelectedFile(null);
     } catch (error) {
       console.error(error);
       setMessage("Erreur lors de l'ajout de la carte.");
@@ -80,8 +149,6 @@ const AjouterProduit = () => {
       setLoading(false);
     }
   };
-  const selectedItem = items.find(i => i.id === Number(formData.item_type_id));
-  const isCard = selectedItem?.name.toLowerCase() === 'carte'; // ou 'carte' selon ton libellé
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -99,12 +166,35 @@ const AjouterProduit = () => {
 
           <div>
             <label htmlFor="name">Nom de l'item</label>
-            <input id="name" value={formData.name} onChange={handleChange} required className="w-full p-2 border rounded" />
+            <input
+              id="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+              autoComplete="off"
+            />
+            {isCard && cardSuggestions.length > 0 && (
+              <ul className="bg-white border rounded mt-1 max-h-40 overflow-y-auto">
+                {cardSuggestions.map(card => (
+                  <li
+                    key={card.id}
+                    className="p-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                    onClick={() => handleSelectSuggestion(card)}
+                  >
+                    <img src={`${card.image}/high.png`} alt={card.name} className="w-8 h-8 object-contain" />
+                    <span>{card.name}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
+
           <div>
             <label htmlFor="edition">Édition</label>
             <input id="edition" value={formData.edition} onChange={handleChange} required className="w-full p-2 border rounded" />
           </div>
+
           {isCard && (
             <div>
               <label htmlFor="rarity_id">Rareté</label>
@@ -115,6 +205,7 @@ const AjouterProduit = () => {
               </select>
             </div>
           )}
+
           <div>
             <label htmlFor="quality">Qualité</label>
             <div className='flex space-x-4'>
@@ -137,18 +228,48 @@ const AjouterProduit = () => {
               />
             </div>
           </div>
+
           <div>
             <label htmlFor="purchase_price">Prix d'achat (€)</label>
             <input id="purchase_price" type="number" step="0.01" value={formData.purchase_price} onChange={handleChange} required className="w-full p-2 border rounded" />
           </div>
+
           <div>
             <label htmlFor="estimated_value">Valeur estimée (€)</label>
             <input id="estimated_value" type="number" step="0.01" value={formData.estimated_value} onChange={handleChange} className="w-full p-2 border rounded" />
           </div>
+
           <div>
-            <label htmlFor="image_url">Image URL</label>
-            <input id="image_url" type="url" value={formData.image_url} onChange={handleChange} className="w-full p-2 border rounded" />
+            <label htmlFor="image_url">Image (URL ou fichier)</label>
+            <input
+              id="image_url"
+              type="url"
+              placeholder="Ou collez une URL"
+              value={formData.image_url}
+              onChange={(e) => {
+                handleChange(e);
+                setSelectedFile(null); // reset file si on colle une URL
+              }}
+              className="w-full p-2 border rounded mb-2"
+            />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                setSelectedFile(e.target.files[0]);
+                setFormData((prev) => ({ ...prev, image_url: '' }));
+              }}
+              className="w-full p-2 border rounded"
+            />
+            {(formData.image_url || selectedFilePreview) && (
+              <img
+                src={selectedFilePreview || formData.image_url}
+                alt="Aperçu"
+                className="w-32 mt-2 rounded border"
+              />
+            )}
           </div>
+
           <button
             type="submit"
             disabled={loading}
@@ -156,6 +277,7 @@ const AjouterProduit = () => {
           >
             {loading ? 'Envoi...' : 'Ajouter la carte'}
           </button>
+
           {message && <p className="text-sm mt-2">{message}</p>}
         </form>
       </div>

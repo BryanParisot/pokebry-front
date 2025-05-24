@@ -3,20 +3,22 @@ import { useEffect } from 'react';
 import { useCollectionStore } from '../stores/collectionStore';
 
 export const Dashboard = () => {
-  
-  
+
+
   const {
-    totalPurchasePrice,
-    totalEstimatedValue,
-    cardCount,
-    fetchCollection,
+    fetchCollection, collection
   } = useCollectionStore()
-  
+
   useEffect(() => {
     fetchCollection()
   }, [])
-  
+
+  const totalPurchasePrice = collection.reduce((sum, card) => sum + parseFloat(card.purchase_price), 0);
+  const totalEstimatedValue = collection.reduce((sum, card) => sum + parseFloat(card.estimated_value), 0);
+  const cardCount = collection.length;
+
   const profitLossPercent = ((totalEstimatedValue - totalPurchasePrice) / totalPurchasePrice) * 100;
+  console.log(collection)
 
   return <div>
     <h1 className="text-2xl font-bold text-gray-800 mb-6">
