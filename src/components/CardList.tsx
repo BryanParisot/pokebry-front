@@ -1,8 +1,8 @@
 import { ChevronDownIcon, FilterIcon, SlidersIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
-import { Card } from './Card';
 import { useRarityStore } from '../stores/useRarityStore';
+import { Card } from './Card';
 
 
 
@@ -15,7 +15,12 @@ export const CardList = () => {
 
 
   const userId = user?.id
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('authToken');
+
+  const handleDeleteCard = (cardId: number) => {
+    setCards((prev) => prev.filter((card) => card.id !== cardId));
+  };
+
   useEffect(() => {
 
     if (rarities.length === 0) {
@@ -34,6 +39,7 @@ export const CardList = () => {
         console.error('Erreur de chargement des cartes :', err);
       } finally {
         setLoading(false);
+        console.log(token)
       }
     };
 
@@ -89,10 +95,11 @@ export const CardList = () => {
                   purchasePrice: card.purchase_price,
                   currentValue: card.estimated_value,
                   image: card.image_url,
-                  rarity: getRarityName(card.rarity_id), 
+                  rarity: getRarityName(card.rarity_id),
                   quality: card.quality
                 }}
                 view={view}
+                onDelete={handleDeleteCard}
               />
             ))
           )}
