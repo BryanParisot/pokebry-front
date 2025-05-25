@@ -56,7 +56,7 @@ export const Card = ({ card, view, onDelete }) => {
   if (view === 'grid') {
     return <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100 hover:shadow-md transition-all hover:border-blue-200 dark:bg-dark-200 dark:border-dark-300">
       <div className="relative pt-[56.25%] bg-gradient-to-br from-blue-50 to-gray-100 overflow-hidden dark:from-dark-300 dark:to-dark-200">
-        <img src={card.image} alt={card.name} className="absolute top-0 left-0 w-full h-full object-contain p-4 transform hover:scale-105 transition-transform" />
+        <img src={card.image} alt={card.name} className="absolute top-0 left-0 w-full h-full object-contain p-2 sm:p-4 transform hover:scale-105 transition-transform" />
         <div className="absolute top-2 right-2 bg-white bg-opacity-90 px-2 py-1 rounded-full text-xs font-semibold text-gray-700 dark:bg-dark-200 dark:text-gray-300">
           {card.rarity}
         </div>
@@ -123,9 +123,9 @@ export const Card = ({ card, view, onDelete }) => {
           </span>
         </div>
       </div>
-      <div className="p-4 flex-1 flex flex-col sm:flex-row sm:items-center justify-between">
+      <div className="p-2 sm:p-4 flex-1 flex flex-col sm:flex-row sm:items-center justify-between flex-wrap" >
         <div>
-          <h3 className="font-bold text-gray-800 dark:text-white">
+          <h3 className="font-semibold text-sm sm:text-base sm:font-bold text-gray-800 dark:text-white">
             {card.name}
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -135,16 +135,16 @@ export const Card = ({ card, view, onDelete }) => {
             {card.rarity}
           </p>
         </div>
-        <div className="flex mt-3 sm:mt-0 space-x-6">
+        <div className="flex mt-3 sm:mt-0 space-x-3 sm:space-x-6">
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Achat</p>
-            <p className="font-semibold text-gray-800 dark:text-white">
+            <p className="font-semibold sm:text-base text-sm text-gray-800 dark:text-white">
               {card.purchasePrice} €
             </p>
           </div>
           <div>
             <p className="text-xs text-gray-500 dark:text-gray-400">Actuel</p>
-            <p className="font-semibold text-gray-800 dark:text-white">
+            <p className="font-semibold sm:text-base text-sm text-gray-800 dark:text-white">
               {card.currentValue} €
             </p>
           </div>
@@ -152,7 +152,7 @@ export const Card = ({ card, view, onDelete }) => {
             <p className="text-xs text-gray-500 dark:text-gray-400">
               Profit/Perte
             </p>
-            <p className={`font-semibold ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`font-semibold sm:text-base text-sm ${isProfitable ? 'text-green-600' : 'text-red-600'}`}>
               {isProfitable ? '+' : ''}
               {profit} € ({profitPercentage}%)
             </p>

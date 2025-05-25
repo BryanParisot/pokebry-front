@@ -1,4 +1,3 @@
-import { ChevronDownIcon, FilterIcon, SlidersIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useRarityStore } from '../stores/useRarityStore';
@@ -49,21 +48,21 @@ export const CardList = () => {
 
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 sm:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h2 className="text-xl font-bold text-gray-800 mb-4 sm:mb-0">
           Votre collection
         </h2>
         <div className="flex flex-wrap gap-2">
-          <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
+          {/* <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
             <FilterIcon size={16} className="mr-1" />
             Filter
-          </button>
-          <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
+          </button> */}
+          {/* <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
             <SlidersIcon size={16} className="mr-1" />
             Sort
             <ChevronDownIcon size={16} className="ml-1" />
-          </button>
+          </button> */}
           <div className="flex rounded-lg overflow-hidden border border-gray-200">
             <button className={`px-3 py-1.5 ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setView('grid')}>
               Grid

@@ -23,7 +23,6 @@ type Props = {
 }
 
 export function BarChart({ data }: Props) {
-    // Regrouper par mois (ex: Mai 2025)
     const monthlyData: { [month: string]: { estimated: number, purchase: number } } = {}
 
     data.forEach(item => {
@@ -48,7 +47,6 @@ export function BarChart({ data }: Props) {
     })
 
     const labels = Object.keys(monthlyData)
-
     const estimatedData = labels.map(month => monthlyData[month].estimated)
     const purchaseData = labels.map(month => monthlyData[month].purchase)
 
@@ -70,6 +68,7 @@ export function BarChart({ data }: Props) {
 
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
             legend: {
                 position: 'top' as const,
@@ -79,7 +78,16 @@ export function BarChart({ data }: Props) {
                 text: 'Évolution des prix par mois',
             },
         },
+        scales: {
+            y: {
+                beginAtZero: true,
+            }
+        }
     }
 
-    return <Bar options={options} data={chartData} />
+    return (
+        <div className="w-full h-[300px] sm:h-[400px] md:h-[300px]">
+            <Bar options={options} data={chartData} />
+        </div>
+    )
 }
