@@ -1,106 +1,104 @@
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '../stores/useAuthStore';
+import { BarChart } from './BarChart';
+import DoughnutChart from './DoughnutChart';
+
 export const Charts = () => {
-  return <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">
-        Collection Growth & Value
-      </h2>
+  const user = useAuthStore((state) => state.user);
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [chartData, setChartData] = useState({ labels: [], dataValues: [] });
+  const token = localStorage.getItem('authToken');
+  const userId = user?.id;
+
+  useEffect(() => {
+    const fetchCards = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/collection/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        setCards(data.collection || []);
+        console.log('les data', data.collection)
+      } catch (err) {
+        console.error('Erreur de chargement des cartes :', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchDistribution = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/api/collection/distribution/${userId}`);
+        const data = await res.json();
+
+        const labels = data.distribution.map((item) => item.item_types);
+        const dataValues = data.distribution.map((item) => item.count);
+        setChartData({ labels, dataValues });
+      } catch (err) {
+        console.error('Erreur de chargement de la distribution :', err);
+      }
+    };
+
+    if (userId && token) {
+      fetchCards();
+      fetchDistribution();
+    }
+  }, [userId, token]);
+
+  // Préparer les données pour le BarChart
+  const monthlyData = cards.reduce((acc, card) => {
+    const date = new Date(card.created_at);
+    const month = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+    if (!acc[month]) {
+      acc[month] = { estimated: 0, purchase: 0 };
+    }
+    acc[month].estimated += parseFloat(card.estimated_value);
+    acc[month].purchase += parseFloat(card.purchase_price);
+    return acc;
+  }, {} as Record<string, { estimated: number; purchase: number }>);
+
+  const barChartData = cards.map((card) => ({
+    estimated_value: card.estimated_value,
+    purchase_price: card.purchase_price,
+    created_at: card.created_at
+  }));
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+      <h2 className="text-xl font-bold text-gray-800 mb-4">Collection</h2>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
           <h3 className="text-md font-semibold text-gray-700 mb-2">
-            Collection Value Over Time
+            Évolution des prix par mois
           </h3>
           <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden">
-            {/* This is a mock chart - in real implementation, use a charting library */}
-            <div className="absolute bottom-0 left-0 w-full h-full flex items-end">
-              <div className="w-1/12 h-20 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-24 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-28 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-32 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-30 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-36 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-40 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-44 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-48 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-52 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-56 bg-blue-400 mx-1"></div>
-              <div className="w-1/12 h-60 bg-blue-400 mx-1"></div>
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full flex items-end">
-              <div className="w-1/12 h-16 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-18 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-22 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-26 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-24 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-30 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-32 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-36 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-40 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-42 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-44 bg-yellow-400 mx-1 opacity-70"></div>
-              <div className="w-1/12 h-46 bg-yellow-400 mx-1 opacity-70"></div>
-            </div>
-            <div className="z-10 text-center text-gray-400">
-              In a real implementation, this would be a proper chart
-            </div>
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
-            <span>Jan</span>
-            <span>Feb</span>
-            <span>Mar</span>
-            <span>Apr</span>
-            <span>May</span>
-            <span>Jun</span>
-            <span>Jul</span>
-            <span>Aug</span>
-            <span>Sep</span>
-            <span>Oct</span>
-            <span>Nov</span>
-            <span>Dec</span>
-          </div>
-          <div className="flex mt-2 justify-center">
-            <div className="flex items-center mr-4">
-              <div className="w-3 h-3 bg-blue-400 rounded-sm mr-1"></div>
-              <span className="text-xs text-gray-600">Market Value</span>
-            </div>
-            <div className="flex items-center">
-              <div className="w-3 h-3 bg-yellow-400 rounded-sm mr-1"></div>
-              <span className="text-xs text-gray-600">Purchase Cost</span>
-            </div>
+            {loading ? (
+              <p>Chargement...</p>
+            ) : (
+              <BarChart data={barChartData} />
+            )}
           </div>
         </div>
         <div>
           <h3 className="text-md font-semibold text-gray-700 mb-2">
-            Collection Distribution
+            Répartition des types
           </h3>
-          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-            <div className="w-48 h-48 relative">
-              {/* Pie chart segments */}
-              <div className="absolute inset-0 border-8 border-transparent border-t-red-500 border-r-red-500 rounded-full transform rotate-0"></div>
-              <div className="absolute inset-0 border-8 border-transparent border-b-blue-500 border-l-blue-500 rounded-full transform rotate-0"></div>
-              <div className="absolute inset-0 border-8 border-transparent border-t-yellow-400 border-r-yellow-400 border-b-yellow-400 rounded-full transform rotate-180"></div>
-              {/* Center circle */}
-              <div className="absolute inset-0 m-auto w-24 h-24 bg-white rounded-full flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-xs text-gray-500">Total</div>
-                  <div className="font-bold text-gray-800">387 cards</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="flex justify-center mt-2">
-            <div className="flex items-center mx-2">
-              <div className="w-3 h-3 bg-red-500 rounded-sm mr-1"></div>
-              <span className="text-xs text-gray-600">Rare (35%)</span>
-            </div>
-            <div className="flex items-center mx-2">
-              <div className="w-3 h-3 bg-blue-500 rounded-sm mr-1"></div>
-              <span className="text-xs text-gray-600">Uncommon (25%)</span>
-            </div>
-            <div className="flex items-center mx-2">
-              <div className="w-3 h-3 bg-yellow-400 rounded-sm mr-1"></div>
-              <span className="text-xs text-gray-600">Common (40%)</span>
+          <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center p-5">
+            <div className="w-full h-full">
+              {chartData.labels.length > 0 && (
+                <DoughnutChart
+                  labels={chartData.labels}
+                  dataValues={chartData.dataValues}
+                  title=""
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };

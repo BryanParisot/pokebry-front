@@ -46,9 +46,6 @@ export const CardList = () => {
     fetchCards();
   }, [userId, token]);
 
-  const getRarityName = (rarityId: number) => {
-    return rarities.find(r => r.id === rarityId)?.name || `Rareté inconnue (${rarityId})`;
-  };
 
 
   return (
@@ -95,7 +92,7 @@ export const CardList = () => {
                   purchasePrice: card.purchase_price,
                   currentValue: card.estimated_value,
                   image: card.image_url,
-                  rarity: getRarityName(card.rarity_id),
+                  rarity: card.rarity,
                   quality: card.quality
                 }}
                 view={view}
