@@ -24,7 +24,6 @@ export const useItemStore = create<RarityState>()(
           );
           const data = await res.json();
           set({ items: data });
-          console.log("data")
         } catch (error) {
           console.error("Erreur lors du chargement des items :", error);
         }

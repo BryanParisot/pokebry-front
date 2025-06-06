@@ -18,7 +18,6 @@ export const Dashboard = () => {
   const cardCount = collection.length;
 
   const profitLossPercent = ((totalEstimatedValue - totalPurchasePrice) / totalPurchasePrice) * 100;
-  console.log(collection)
 
   return <div>
     <h1 className="text-2xl font-bold text-gray-800 mb-6">

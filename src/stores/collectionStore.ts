@@ -27,6 +27,7 @@ export const useCollectionStore = create<CollectionStore>((set) => ({
       const res = await fetch("http://localhost:3000/api/collection/user/2");
       const data = await res.json();
       set({ collection: data.collection });
+      console.log(data)
     } catch (error) {
       console.error("Erreur lors du chargement de la collection :", error);
     }
