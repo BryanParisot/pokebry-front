@@ -21,7 +21,6 @@ export const Charts = () => {
         });
         const data = await res.json();
         setCards(data.collection || []);
-        console.log('les data', data.collection)
       } catch (err) {
         console.error('Erreur de chargement des cartes :', err);
       } finally {
@@ -31,7 +30,11 @@ export const Charts = () => {
 
     const fetchDistribution = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/collection/distribution/${userId}`);
+        const res = await fetch(`http://localhost:3000/api/collection/distribution/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         const data = await res.json();
 
         const labels = data.distribution.map((item) => item.item_types);
