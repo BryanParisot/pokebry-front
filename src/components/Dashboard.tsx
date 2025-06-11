@@ -1,4 +1,4 @@
-import { CreditCardIcon, DollarSignIcon, PercentIcon, TrendingUpIcon } from 'lucide-react';
+import { CreditCardIcon, DollarSignIcon, PercentIcon, TrendingUpIcon, PiggyBankIcon } from 'lucide-react';
 import { useEffect } from 'react';
 import { useCollectionStore } from '../stores/collectionStore';
 
@@ -16,6 +16,8 @@ export const Dashboard = () => {
   const totalPurchasePrice = collection.reduce((sum, card) => sum + parseFloat(card.purchase_price), 0);
   const totalEstimatedValue = collection.reduce((sum, card) => sum + parseFloat(card.estimated_value), 0);
   const cardCount = collection.length;
+  const netIncome = totalEstimatedValue - totalPurchasePrice;
+
 
   const profitLossPercent = ((totalEstimatedValue - totalPurchasePrice) / totalPurchasePrice) * 100;
 
@@ -23,10 +25,11 @@ export const Dashboard = () => {
     <h1 className="text-2xl font-bold text-gray-800 mb-6">
       Tableau de bord de la collection
     </h1>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
       <StatCard title="Total des items" value={cardCount} icon={<CreditCardIcon className="text-blue-500" />} color="blue" />
       <StatCard title="Dépenses totales" value={`${totalPurchasePrice.toFixed(2)} €`} icon={<DollarSignIcon className="text-red-500" />} color="red" />
       <StatCard title="Valeur du marché" value={`${totalEstimatedValue.toFixed(2)} €`} icon={<TrendingUpIcon className="text-green-500" />} color="green" />
+      <StatCard title="Revenu net" value={`${netIncome.toFixed(2)} €`} icon={<PiggyBankIcon className="text-green-500" />} color="green" />
       <StatCard
         title="Profit/Perte"
         value={`${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toFixed(1)}%`}
