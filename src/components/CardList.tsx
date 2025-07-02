@@ -1,51 +1,33 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { useRarityStore } from '../stores/useRarityStore';
+import { useCollectionStore } from '../stores/collectionStore';
 import { Card } from './Card';
 
-
-
 export const CardList = () => {
-  const [view, setView] = useState('grid');
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+
   const user = useAuthStore((state) => state.user);
   const { rarities, fetchRarities } = useRarityStore();
+  const { collection: cards, fetchCollection, deleteCard } = useCollectionStore();
 
-
-  const userId = user?.id
-  const token = localStorage.getItem('authToken');
+  const userId = user?.id;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
   const handleDeleteCard = (cardId: number) => {
-    setCards((prev) => prev.filter((card) => card.id !== cardId));
+    // Tu peux ajouter un appel API ici si tu veux supprimer côté backend aussi
+    deleteCard(cardId);
   };
 
   useEffect(() => {
+    if (!userId || !token) return;
 
     if (rarities.length === 0) {
       fetchRarities();
     }
-    const fetchCards = async () => {
-      try {
-        const res = await fetch(`http://localhost:3000/api/collection/user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        const data = await res.json();
-        setCards(data.collection || []);
-      } catch (err) {
-        console.error('Erreur de chargement des cartes :', err);
-      } finally {
-        setLoading(false);
-        console.log(token)
-      }
-    };
 
-    fetchCards();
+    fetchCollection();
   }, [userId, token]);
-
-
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 sm:p-6">
@@ -54,51 +36,46 @@ export const CardList = () => {
           Votre collection
         </h2>
         <div className="flex flex-wrap gap-2">
-          {/* <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
-            <FilterIcon size={16} className="mr-1" />
-            Filter
-          </button> */}
-          {/* <button className="flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg text-sm">
-            <SlidersIcon size={16} className="mr-1" />
-            Sort
-            <ChevronDownIcon size={16} className="ml-1" />
-          </button> */}
           <div className="flex rounded-lg overflow-hidden border border-gray-200">
-            <button className={`px-3 py-1.5 ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setView('grid')}>
+            <button
+              className={`px-3 py-1.5 ${view === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+              onClick={() => setView('grid')}
+            >
               Grid
             </button>
-            <button className={`px-3 py-1.5 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`} onClick={() => setView('list')}>
+            <button
+              className={`px-3 py-1.5 ${view === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'}`}
+              onClick={() => setView('list')}
+            >
               List
             </button>
           </div>
         </div>
       </div>
 
-      {loading ? (
-        <p>Chargement...</p>
+      {cards.length === 0 ? (
+        <p>Aucun objet dans votre collection.</p>
       ) : (
         <div className={`${view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}`}>
-          {cards.length === 0 ? (
-            <p>Aucun objet dans votre collection.</p>
-          ) : (
-            cards.map(card => (
-              <Card
-                key={card.id}
-                card={{
-                  id: card.id,
-                  name: card.name,
-                  edition: card.edition,
-                  purchasePrice: card.purchase_price,
-                  currentValue: card.estimated_value,
-                  image: card.image_url,
-                  rarity: card.rarity,
-                  quality: card.quality
-                }}
-                view={view}
-                onDelete={handleDeleteCard}
-              />
-            ))
-          )}
+          {cards.map(card => (
+            <Card
+              key={card.id}
+              card={{
+                id: card.id,
+                name: card.name,
+                edition: card.edition,
+                purchasePrice: card.purchase_price,
+                currentValue: card.estimated_value,
+                image: card.image_url,
+                rarity: card.rarity,
+                quality: card.quality,
+                item_type: card.item_type
+              }}
+              view={view}
+              onDelete={() => handleDeleteCard(card.id)}
+              onUpdate={fetchCollection}
+            />
+          ))}
         </div>
       )}
     </div>
