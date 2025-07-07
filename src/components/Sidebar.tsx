@@ -1,10 +1,12 @@
 import {
   BarChartIcon,
   HomeIcon,
-  LogOutIcon, MenuIcon,
+  LogOutIcon,
+  MenuIcon,
   MoonIcon,
   PlusCircleIcon,
   SunIcon,
+  UserIcon,
   XIcon
 } from 'lucide-react';
 import { useState } from 'react';
@@ -67,6 +69,12 @@ export const Sidebar = () => {
               <Link to="/statistiques" onClick={() => setIsOpen(false)} className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg ${isActive('/statistiques') ? 'bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-300'}`}>
                 <BarChartIcon size={20} />
                 <span>Statistiques</span>
+              </Link>
+            </li>
+            <li>
+              <Link to="/profilepage" onClick={() => setIsOpen(false)} className={`flex items-center space-x-3 px-4 py-2.5 rounded-lg ${isActive('/profilepage') ? 'bg-blue-500 text-white' : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-300'}`}>
+                <UserIcon size={20} />
+                <span>Profil</span>
               </Link>
             </li>
             <li>

@@ -22,7 +22,7 @@ export const Dashboard = () => {
   const profitLossPercent = ((totalEstimatedValue - totalPurchasePrice) / totalPurchasePrice) * 100;
 
   return <div>
-    <h1 className="text-2xl font-bold text-gray-800 mb-6">
+    <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
       Tableau de bord de la collection
     </h1>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

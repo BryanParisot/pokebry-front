@@ -8,6 +8,7 @@ import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Statistiques } from './pages/Statistiques';
+import {ProfilePage} from './pages/ProfilPage';
 
 
 
@@ -22,6 +23,7 @@ export function App() {
           <Routes>
             <Route path="/" element={<PrivateRoute><Home /></PrivateRoute>} />
             <Route path="/statistiques" element={<PrivateRoute><Statistiques /></PrivateRoute>} />
+            <Route path="/profilepage" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
             <Route path="/ajouter" element={<PrivateRoute><AjouterProduit /></PrivateRoute>} />
           </Routes>
         </Layout>} />
