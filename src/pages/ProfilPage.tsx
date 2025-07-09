@@ -3,7 +3,21 @@ import { useAuthStore } from "../stores/useAuthStore";
 export const ProfilePage = () => {
 
     const user = useAuthStore((state) => state.user);
+    if (!user) {
+        return <div>Chargement du profil...</div>;
+    }
 
+    const handlePremium = async () => {
+        const res = await fetch("http://localhost:3000/api/stripe/create-checkout-session", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: user.id }),
+        });
+
+        const data = await res.json();
+        window.location.href = data.url;
+      };
+      
     return (
         <div className="flex flex-col bg-gray-50 dark:bg-gray-800 mb-6">
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">Mon Profil</h1>
@@ -46,7 +60,7 @@ export const ProfilePage = () => {
                     <div className="pt-4">
                         {!user.is_premium ? (
                             <button
-                                onClick={() => alert("Redirection vers page abonnement à venir")}
+                                onClick={handlePremium}
                                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition duration-200"
                             >
                                 Passer en premium

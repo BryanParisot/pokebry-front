@@ -7,6 +7,7 @@ interface User {
   last_name: string;
   email: string;
   is_premium: boolean;
+  created_at: string;
 }
 
 interface AuthState {
